@@ -1,0 +1,13 @@
+# src/utils/__init__.py
+
+from .analyse_group_distributions import analyse_group_distributions
+
+from .compare_dataframes import compare_dataframes
+
+from .perform_bivariate_analysis import perform_bivariate_analysis
+from .perform_multivariate_boxplot import perform_multivariate_boxplot
+from .perform_multivariate_cat_analysis import perform_multivariate_cat_analysis
+from .perform_multivariate_countplot import perform_multivariate_countplot
+from .perform_univariate_analysis import perform_univariate_analysis
+
+from .analyse_cat_proportions import analyse_cat_proportions

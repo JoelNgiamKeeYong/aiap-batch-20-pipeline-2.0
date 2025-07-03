@@ -1,0 +1,122 @@
+# config.yaml
+# This is a configuration file for the machine learning pipeline.
+
+############################################################################################################################################
+# GENERAL
+LOKY_MAX_CPU_COUNT: "4" # Maximum number of CPU cores to use for parallel processing.
+n_jobs: -1 # Number of parallel jobs to run (-1 means use all available CPU cores).
+random_state: 42 # Random seed for reproducibility (e.g between train-test splits during EDA and pipeline).
+
+############################################################################################################################################
+# DATABASE
+data_url: "https://techassessment.blob.core.windows.net/aiap20-assessment-data/bmarket.db" # URL to download the SQLite database.
+db_path: "data/bmarket.db" # Path to the SQLite database file.
+db_table_name: "bank_marketing" # Name of the table in the database that contains the data.
+target: "subscription_status" # Name of the target variable in the dataset.
+
+############################################################################################################################################
+# PREPROCESSING
+test_size: 0.2 # Proportion of the dataset to include in the test split (Default: 20%).
+run_on_clean_data: False # Set to True to run the pipeline on clean data (before advanced cleaning and feature engineering).
+
+############################################################################################################################################
+# EVALUATION
+generate_feature_importance: True # Set to True to generate feature importance plots. Change to False for time efficiency.
+generate_confusion_matrix: True # Set to True to generate confusion matrix plots. Change to False for time efficiency.
+generate_learning_curve: True # Set to True to generate learning curve plots. Change to False for time efficiency.
+generate_calibration_curve: True # Set to True to generate calibration curve plots. Change to False for time efficiency.
+
+############################################################################################################################################
+# TRAINING & VALIDATION
+use_randomized_cv: False # Set to False to use GridSearchCV instead of RandomizedSearchCV.
+use_smote_enn: True # Set to True to use SMOTE-ENN for handling class imbalance. Uses SMOTE otherwise.
+cv_folds: 5 # Number of cross-validation folds for hyperparameter tuning.
+scoring_metric: "recall" # Metric to optimize during hyperparameter tuning. Options: "recall", "precision", "f1", "roc_auc". (Default: "recall").
+minimum_acceptable_precision: 0.2 # Minimum acceptable precision for the model. 0.2 means 20% precision.
+model_configuration: # Hyperparameter configurations for different models. Only relevant parameters included - feel free to add more.
+  ##########################################################################################################################################
+  # LOGISTIC REGRESSION
+  Logistic Regression:
+    # For GridSearch CV - For finer hyperparameter tuning
+    params_gscv:
+      C: [0.5621564911890039] # Inverse of regularization strength; smaller values specify stronger regularization.
+      solver: ["liblinear"] # Algorithm to use in optimization.
+      penalty: ["l1"] # Regularization type (only supported by certain solvers)
+      class_weight: [null] # Weights associated with classes.
+
+    # For RandomizedSearch CV - For general exploration
+    params_rscv:
+      C: { "type": "uniform", "low": 0.01, "high": 100 }
+      solver: ["liblinear"]
+      penalty: ["l1", "l2"]
+      class_weight: [null, "balanced"]
+
+  ##########################################################################################################################################
+  # RANDOM FOREST
+  # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+  Random Forest:
+    params_gscv:
+      model__n_estimators: [109] # Default=100
+      model__max_depth: [8] # Default=None
+      model__min_samples_split: [2] # Minimum number of samples required to split an internal node. Default is 2. Range: [2, 20].
+      model__min_samples_leaf: [1] # Minimum number of samples required to be at a leaf node. Default is 1. Range: [1, 10].
+      model__max_leaf_nodes: [25] # Maximum number of leaf nodes in each tree. "null" means no limit. Default is "null". Range: [10, 500].
+      # model__max_features: ["sqrt"] # Number of features to consider when looking for the best split. DEfault is "sqrt". Range: ["sqrt", "log2", null].
+      model__class_weight: ["balanced"] # Weights associated with classes. Default is "null". Range: ["balanced", "balanced_subsample", null].
+      model__criterion: ["gini"] # Default="gini" / ["gini", "entropy", "log_loss"]
+
+    params_rscv:
+      model__n_estimators: { "type": "randint", "low": 10, "high": 200 }
+      model__max_depth: { "type": "randint", "low": 5, "high": 30 }
+      model__min_samples_split: { "type": "randint", "low": 2, "high": 20 }
+      model__min_samples_leaf: { "type": "randint", "low": 1, "high": 10 }
+      model__max_leaf_nodes: { "type": "randint", "low": 10, "high": 500 }
+      model__max_features: ["sqrt", "log2", null]
+      model__class_weight: ["balanced", "balanced_subsample", null]
+      model__criterion: ["gini", "entropy"]
+
+  ##########################################################################################################################################
+  # XG BOOST
+  XGBoost:
+    params_gscv:
+      model__learning_rate: [0.1] # Step size shrinkage to prevent overfitting. Default is 0.3; Range: [0, 1].
+      model__max_depth: [6] # Maximum depth of each tree. Default is 6; Range: [0, 15].
+      # model__subsample: [1] # Fraction of samples to use for each tree. Default is 1. Range: [0, 1].
+      # model__colsample_bytree: [0.1, 0.3] # Fraction of features to use for each tree. Default is 1; Range [0,1]
+      # model__reg_lambda: [0.1] # L2 regularization term on weights. Default is 1. Range: [0, Infinity]
+      # model__reg_alpha: [1.0] # L1 regularization term on weights. Default is 0. Range: [0, Infinity]
+      # model__scale_pos_weight: [3] # Controls the balance of positive and negative weights. Default is 1.
+      # model__eval_metric: ["logloss"] # Evaluation metric for validation set. Default is "logloss".
+
+    params_rscv:
+      model__learning_rate: { "type": "uniform", "low": 0.01, "high": 0.2 }
+      model__max_depth: { "type": "randint", "low": 3, "high": 10 }
+      model__subsample: { "type": "uniform", "low": 0.7, "high": 1.0 }
+      model__colsample_bytree: { "type": "uniform", "low": 0.5, "high": 1.0 }
+      model__reg_lambda: { "type": "uniform", "low": 0.01, "high": 1.0 }
+      model__reg_alpha: { "type": "uniform", "low": 0.01, "high": 1.0 }
+      model__scale_pos_weight: { "type": "uniform", "low": 0.5, "high": 3.0 }
+      model__eval_metric: ["logloss", "auc"]
+
+  ##########################################################################################################################################
+  # LIGHT GBM
+  LightGBM:
+    params_gscv:
+      model__learning_rate: [0.1] # Controls the contribution of each tree. Default is 0.1
+      model__n_estimators: [50] # Number of boosting rounds (trees). Default is 100.
+      model__max_depth: [5] # Maximum depth of each tree. Default is -1 (no limit).
+      model__num_leaves: [31] # Number of leaves in each tree. Default is 31.
+      model__subsample: [0.7] # Fraction of samples to use for each tree. Default is 1.0.
+      model__colsample_bytree: [0.5] # Fraction of features to use for each tree. Default is 1.0.
+      model__reg_lambda: [0.3] # L2 regularization term to prevent overfitting. Default is 0.0.
+      model__is_unbalance: [True] # Whether to use unbalanced data. Default is False.
+
+    params_rscv:
+      model__learning_rate: { "type": "uniform", "low": 0.01, "high": 0.1 }
+      model__n_estimators: { "type": "randint", "low": 50, "high": 200 }
+      model__max_depth: { "type": "randint", "low": 3, "high": 7 }
+      model__num_leaves: { "type": "randint", "low": 20, "high": 50 }
+      model__subsample: { "type": "uniform", "low": 0.6, "high": 1.0 }
+      model__colsample_bytree: { "type": "uniform", "low": 0.5, "high": 1.0 }
+      model__reg_lambda: { "type": "uniform", "low": 0.01, "high": 0.5 }
+      model__is_unbalance: [True]
