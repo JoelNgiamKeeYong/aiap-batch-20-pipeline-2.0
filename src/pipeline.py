@@ -69,13 +69,16 @@ def main():
     df = load_data(db_path=DB_PATH, db_table_name=DB_TABLE_NAME)
 
     # Step 2: Clean the dataset
-    df_cleaned = clean_data(df)
+    df_cleaned = clean_data(df=df)
     compare_dataframes(df_original=df, df_new=df_cleaned, original_name_string="raw", new_name_string="cleaned")
 
     # Step 3: Preprocess the data
     X_train, X_test, y_train, y_test, df_preprocessed = preprocess_data(
         df_cleaned=df_cleaned,
-        target=TARGET, test_size=TEST_SIZE, run_on_clean_data = RUN_CON_CLEAN_DATA, random_state=RANDOM_STATE
+        target=TARGET,
+        test_size=TEST_SIZE,
+        run_on_clean_data = RUN_CON_CLEAN_DATA,
+        random_state=RANDOM_STATE
     )
     compare_dataframes(df_original=df_cleaned, df_new=df_preprocessed, original_name_string="cleaned", new_name_string="preprocessed", show_verbose=False)
 
@@ -111,14 +114,17 @@ def main():
         models=models, 
         X_train=X_train, y_train=y_train,
         use_randomized_cv=USE_RANDOMIZED_CV,
-        n_jobs=N_JOBS, use_smote_enn=USE_SMOTE_ENN, cv_folds=CV_FOLDS, scoring_metric=SCORING_METRIC, random_state=RANDOM_STATE
+        use_smote_enn=USE_SMOTE_ENN,
+        cv_folds=CV_FOLDS, scoring_metric=SCORING_METRIC,
+        n_jobs=N_JOBS, random_state=RANDOM_STATE
     )
 
     # Step 6: Evaluate the models
     trained_models = evaluate_models(
         trained_models=trained_models,
         X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
-        scoring=SCORING_METRIC, minimum_acceptable_precision=MINIMUM_ACCEPTABLE_PRECISION,
+        scoring=SCORING_METRIC,
+        minimum_acceptable_precision=MINIMUM_ACCEPTABLE_PRECISION,
         generate_feature_importance=GENERATE_FEATURE_IMPORTANCE,
         generate_confusion_matrix=GENERATE_CONFUSION_MATRIX,
         generate_learning_curve=GENERATE_LEARNING_CURVE,

@@ -4,9 +4,11 @@ import os
 import time
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import learning_curve, StratifiedKFold
 from sklearn.inspection import permutation_importance
-import seaborn as sns
+
 from tabulate import tabulate
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import (
@@ -19,7 +21,6 @@ from sklearn.metrics import (
     precision_recall_curve,
     roc_curve,
 )
-import matplotlib.pyplot as plt
 
 
 def evaluate_models(trained_models, X_train, X_test, y_train, y_test, scoring, minimum_acceptable_precision=0.5, random_state=42, generate_feature_importance=True, generate_confusion_matrix=True, generate_learning_curve=True, generate_calibration_curve=True):

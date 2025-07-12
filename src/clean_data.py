@@ -2,7 +2,6 @@
 
 import os
 import time
-import re
 import pandas as pd
 
 def clean_data(df):
@@ -90,13 +89,8 @@ def clean_data(df):
 def convert_column_names_to_snake_case(df_cleaned):
     # Convert column names to snake_case
     print("   └── Converting column names to snake_case...")
-    new_columns = []
-    for col in df_cleaned.columns:
-        # Convert CamelCase to snake_case and replace spaces/dots with underscore
-        col = re.sub(r'(?<!^)(?=[A-Z])', '_', col).lower()
-        col = col.replace(' ', '_').replace('.', '_')
-        new_columns.append(col)
-    df_cleaned.columns = new_columns
+    df_cleaned.columns = [col.lower().replace(' ', '_') for col in df_cleaned.columns]
+    
     return df_cleaned
 
 #################################################################################################################################
