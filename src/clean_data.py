@@ -33,7 +33,7 @@ def clean_data(df):
 
         # Check if the cleaned data file already exists
         if os.path.exists(output_path):
-            print(f"\n✅ Found existing cleaned data. Skipping cleaning process...")
+            print(f"\n🧼 Found existing cleaned data. Skipping cleaning process...")
             return pd.read_csv(output_path)
 
         # Carry out cleaning id cleaned data file does not exist

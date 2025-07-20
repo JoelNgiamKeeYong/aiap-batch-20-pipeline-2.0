@@ -80,7 +80,7 @@ def load_data(db_path, db_table_name):
     # Print summary and return the data
     end_time = time.time() 
     elapsed_time = end_time - start_time
-    print(f"\n✅ {len(df):,} records successfully loaded in {elapsed_time:.2f} seconds!")
+    print(f"   └── {len(df):,} records successfully loaded in {elapsed_time:.2f} seconds!")
 
     # Return the data
     return df

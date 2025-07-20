@@ -6,21 +6,26 @@ import time
 import yaml
 import argparse
 import matplotlib
-import pandas as pd
-from datetime import datetime
-from tabulate import tabulate
+import numpy as np
+
+from sklearn.utils.multiclass import type_of_target
+from sklearn.base import is_classifier, is_regressor
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 
-# Importing custom modules
-from utils import compare_dataframes
+from utils import compare_dataframes, log_training_summary
+from pipeline_debug import run_debug_pipeline
 from load_data import load_data 
 from clean_data import clean_data
 from preprocess_data import preprocess_data
-from train_models import train_models
-from evaluate_models import evaluate_models
+from train_classification_models import train_classification_models
+from train_regression_models import train_regression_models
+from evaluate_classification_models import evaluate_classification_models
+from evaluate_regression_models import evaluate_regression_models
+
 
 def main():
     # Start timer
@@ -46,43 +51,64 @@ def main():
     TEST_SIZE = config["test_size"]
     RANDOM_STATE = config["random_state"]
     N_JOBS = config["n_jobs"]
-    GENERATE_FEATURE_IMPORTANCE = config['generate_feature_importance']
-    GENERATE_CONFUSION_MATRIX = config['generate_confusion_matrix']
-    GENERATE_LEARNING_CURVE = config['generate_learning_curve']
-    GENERATE_CALIBRATION_CURVE = config['generate_calibration_curve']
+    GENERATE_PLOTS = config['generate_plots'] 
     USE_RANDOMIZED_CV = config["use_randomized_cv"]
     USE_SMOTE_ENN = config["use_smote_enn"]
-    RUN_CON_CLEAN_DATA = config["run_on_clean_data"]
+    RUN_ON_CLEAN_DATA = config["run_on_clean_data"]
     CV_FOLDS = config["cv_folds"]
     SCORING_METRIC = config["scoring_metric"]
     MINIMUM_ACCEPTABLE_PRECISION = config["minimum_acceptable_precision"]
+    MINIMUM_ACCEPTABLE_RECALL = config["minimum_acceptable_recall"]
     LR_MODEL = config["model_configuration"]["Logistic Regression"]
     RF_MODEL = config["model_configuration"]["Random Forest"]
     XG_MODEL = config["model_configuration"]["XGBoost"]
     LGBM_MODEL = config["model_configuration"]["LightGBM"]
 
-    # Set environment variables for parallel processing and matplotlib backend
-    os.environ['LOKY_MAX_CPU_COUNT'] = LOKY_MAX_CPU_COUNT 
+    # Set environment variables
+    os.environ['LOKY_MAX_CPU_COUNT'] = LOKY_MAX_CPU_COUNT  # Set maximum CPU count for loky
     matplotlib.use('Agg')  # Non-interactive backend for plotting
 
-    # Step 1: Load the dataset
+    #################################################################################################################################
+    #################################################################################################################################
+    # ☑️ DEBUG MODE
+    # Debug short-circuit pipeline for quick testing
+    if config.get("debug", False):
+        run_debug_pipeline(config)
+        return  # Exit after running debug pipeline
+    
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 1: LOAD DATA
+    # - Load the dataset into a pandas DataFrame.
     df = load_data(db_path=DB_PATH, db_table_name=DB_TABLE_NAME)
 
-    # Step 2: Clean the dataset
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 2: CLEAN DATA
+    # - Clean the dataset for further exploration and preprocessing,
+    # - To avoid data leakage, do not make too many assumptions about the data.
     df_cleaned = clean_data(df=df)
     compare_dataframes(df_original=df, df_new=df_cleaned, original_name_string="raw", new_name_string="cleaned")
 
-    # Step 3: Preprocess the data
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 3: PREPROCESS DATA
+    # - Preprocess the cleaned dataset to prepare it for model training.
+    # - Most of the feature engineering is performed here.
     X_train, X_test, y_train, y_test, df_preprocessed = preprocess_data(
         df_cleaned=df_cleaned,
         target=TARGET,
         test_size=TEST_SIZE,
-        run_on_clean_data = RUN_CON_CLEAN_DATA,
+        run_on_clean_data = RUN_ON_CLEAN_DATA,
         random_state=RANDOM_STATE
     )
     compare_dataframes(df_original=df_cleaned, df_new=df_preprocessed, original_name_string="cleaned", new_name_string="preprocessed", show_verbose=False)
 
-    # Step 4: Define the models and their respective hyperparameter grids
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 4: DEFINE CANDIDATE MODELS
+    # - Define the models to be trained and their respective hyperparameter grids.
+    # - Validate that the models are appropriate for the task type (classification or regression).
     all_models = {
         "Logistic Regression": {
             "model": LogisticRegression(random_state=RANDOM_STATE),
@@ -90,7 +116,7 @@ def main():
             "params_rscv": LR_MODEL['params_rscv']
         },
         "Random Forest": {
-            "model": RandomForestClassifier( random_state=RANDOM_STATE),
+            "model": RandomForestClassifier(random_state=RANDOM_STATE),
             "params_gscv": RF_MODEL['params_gscv'],
             "params_rscv": RF_MODEL['params_rscv']
         },
@@ -105,51 +131,68 @@ def main():
             "params_rscv": LGBM_MODEL['params_rscv']
         }
     }
+    models = select_models_to_train(args=args, all_models=all_models)  # Get the models to train based on arguments
+    task_type = detect_task_type_and_validate_models(y=y_train, models=models)  # Determine ML task type based on the target variable
 
-    # Get the models to train based on arguments
-    models = get_models_to_train(args, all_models)
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 5: TRAIN MODELS
+    # - Train the models using the training data.
+    if task_type == "regression":
+        trained_models = train_regression_models(
+            models=models, 
+            X_train=X_train, y_train=y_train,
+            use_randomized_cv=USE_RANDOMIZED_CV,
+            scoring_metric=SCORING_METRIC,
+            n_jobs=N_JOBS, random_state=RANDOM_STATE
+        )
+    elif task_type == "classification":
+        trained_models = train_classification_models(
+            models=models, 
+            X_train=X_train, y_train=y_train,
+            use_randomized_cv=USE_RANDOMIZED_CV,
+            use_smote_enn=USE_SMOTE_ENN,
+            cv_folds=CV_FOLDS, scoring_metric=SCORING_METRIC,
+            n_jobs=N_JOBS, random_state=RANDOM_STATE
+        )
 
-    # Step 5: Train the models
-    trained_models = train_models(
-        models=models, 
-        X_train=X_train, y_train=y_train,
-        use_randomized_cv=USE_RANDOMIZED_CV,
-        use_smote_enn=USE_SMOTE_ENN,
-        cv_folds=CV_FOLDS, scoring_metric=SCORING_METRIC,
-        n_jobs=N_JOBS, random_state=RANDOM_STATE
-    )
-
-    # Step 6: Evaluate the models
-    trained_models = evaluate_models(
-        trained_models=trained_models,
-        X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
-        scoring=SCORING_METRIC,
-        minimum_acceptable_precision=MINIMUM_ACCEPTABLE_PRECISION,
-        generate_feature_importance=GENERATE_FEATURE_IMPORTANCE,
-        generate_confusion_matrix=GENERATE_CONFUSION_MATRIX,
-        generate_learning_curve=GENERATE_LEARNING_CURVE,
-        generate_calibration_curve=GENERATE_CALIBRATION_CURVE   
-    )
-
-    # Step 7: Log training
-    log_training(trained_models)
-
-    # Print a summary table of training times and model sizes
-    print("\nPipeline Summary Table:")
-    table_data = [
-        [model_name, f"{model_size_kb:.2f}", f"{training_time:.2f}", f"{evaluation_time:.2f}"]
-        for model_name, best_model, training_time, model_size_kb, formatted_metrics, evaluation_time in trained_models
-    ]
-    headers = ["Model Name", "Model Size (KB)", "Training Time (s)", "Evaluation Time (s)"]
-    print(tabulate(table_data, headers=headers, tablefmt="grid"))
-
-    # Record time taken for pipeline execution
-    end_time = time.time() 
-    elapsed_time = end_time - start_time
-    print(f"\n✅ Completed in {elapsed_time:.2f} seconds.")
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 6: EVALUATE MODELS
+    # - Evaluate the models using the test data.
+    if task_type == "regression":
+        trained_models = evaluate_regression_models(
+            trained_models=trained_models,
+            X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
+            scoring=SCORING_METRIC,
+            generate_plots=GENERATE_PLOTS,
+            n_jobs=N_JOBS, random_state=RANDOM_STATE
+        )
+    elif task_type == "classification":
+        trained_models = evaluate_classification_models(
+            trained_models=trained_models,
+            X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
+            scoring=SCORING_METRIC,
+            minimum_acceptable_precision=MINIMUM_ACCEPTABLE_PRECISION,
+            minimum_acceptable_recall=MINIMUM_ACCEPTABLE_RECALL,  
+            generate_plots=GENERATE_PLOTS,
+            n_jobs=N_JOBS, random_state=RANDOM_STATE,
+        )   
+    
+    #################################################################################################################################
+    #################################################################################################################################
+    # ✅ STEP 7: LOG TRAINING SUMMARY
+    log_training_summary(trained_models=trained_models, start_time=start_time)
 
 
-def get_models_to_train(args, all_models):
+#####################################################################################################################################
+#####################################################################################################################################
+# HELPER FUNCTIONS
+
+#####################################################################################################################################
+#####################################################################################################################################
+# 📀 SELECT MODELS TO TRAIN
+def select_models_to_train(args, all_models):
     """
     Determines which models to train based on command-line arguments.
     
@@ -170,8 +213,7 @@ def get_models_to_train(args, all_models):
 
     # Filter models based on arguments
     if args.lite:
-        # Run only LightGBM in Lite Mode
-        return {"LightGBM": all_models["LightGBM"]}
+        return {"LightGBM": all_models["LightGBM"]}  # Run only LightGBM in Lite Mode
 
     # Select models based on --model arguments, default to all models if none are specified
     selected_models = args.model or ["lr", "rf", "xgb", "lgbm"]  # Default to all models if no --model is provided
@@ -188,47 +230,46 @@ def get_models_to_train(args, all_models):
 
     return models
 
-
-def log_training(trained_models):
+#####################################################################################################################################
+#####################################################################################################################################
+# 📀 DETECT TASK TYPE AND VALIDATE MODELS
+def detect_task_type_and_validate_models(y, models):
     """
-    Logs training details into a file in the archives folder, appending new content at the top of the file.
+    Detect task type from y and validate that all models are appropriate.
+
+    Args:
+        y (array-like): Target variable.
+        models (dict): Dict of models to validate.
+
+    Returns:
+        str: Detected task type ('classification' or 'regression').
+
+    Raises:
+        ValueError: If model types don't match the task.
     """
-    archives_dir = "archives"
-    log_file_path = os.path.join(archives_dir, "training_logs.txt")
-    
-    # Ensure the archives directory exists
-    os.makedirs(archives_dir, exist_ok=True)
+    y = np.asarray(y)
+    target_type = type_of_target(y)
 
-    # Prepare the new content to prepend
-    new_content = ""
-    for model_name, best_model, training_time, model_size_kb, formatted_metrics, evaluation_time in trained_models:
-        new_content += "=" * 135 + "\n"
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
-        new_content += "🕛 " + current_time + "\n"
-        metrics_table = tabulate(
-            pd.DataFrame([formatted_metrics]).to_dict(orient='records'),
-            headers="keys",
-            tablefmt="grid",
-            floatfmt=".2f"
-        )
-        new_content += metrics_table + "\n"
-        new_content += f"└──── Model Size: {model_size_kb:.2f} KB\n"
-        new_content += f"└──── Training Time: {training_time:.2f} seconds\n"
-        new_content += f"└──── Evaluation Time: {evaluation_time:.2f} seconds\n"
-        new_content += f"└──── Best Parameters: {best_model.get_params()}\n\n"
-
-    # Read the existing content of the file (if it exists)
-    if os.path.exists(log_file_path):
-        with open(log_file_path, "r", encoding="utf-8") as f:
-            existing_content = f.read()
+    # Determine task type based on target
+    if target_type in ["binary", "multiclass", "multilabel-indicator", "multiclass-multioutput"]:
+        task_type = "classification"
+    elif target_type in ["continuous", "continuous-multioutput"]:
+        task_type = "regression"
     else:
-        existing_content = ""
+        raise ValueError(f"❌ Unrecognized target type: {target_type}")
 
-    # Write the new content followed by the existing content
-    with open(log_file_path, "w", encoding="utf-8") as f:
-        f.write(new_content + existing_content)
+    # Validate models
+    for name, model_dict in models.items():
+        model = model_dict["model"]
+        if task_type == "classification" and not is_classifier(model):
+            raise ValueError(f"❌ Model '{name}' is not a classifier but task is classification.")
+        elif task_type == "regression" and not is_regressor(model):
+            raise ValueError(f"❌ Model '{name}' is not a regressor but task is regression.")
 
-    print(f"💾 Saved training logs to archives folder!")
+    print(f"\n🧠  Validating candidate models...")
+    print(f"    └── Detected ML task type: {task_type}")
+    print(f"    └── All models valid.")
+    return task_type
 
 
 if __name__ == "__main__":

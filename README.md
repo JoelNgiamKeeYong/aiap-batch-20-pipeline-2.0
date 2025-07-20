@@ -78,11 +78,12 @@ The pipeline is built to be **reusable, readable, and self-explanatory**, facili
 ├── archives/              # Folder for inactive files and logs
 ├── assets/                # Images or visualization assets
 ├── data/                  # Location for datasets; contents auto-generated
+├── functions/             # General functions for EDA
 ├── models/                # Saved trained models; contents are auto-generated
 ├── modules/               # Saved preprocessors and intermediary models; contents are auto-generated
 ├── output/                # Results of model evaluations; contents are auto-generated
 ├── src/                   # Python modules for the ML pipeline
-│   └── utils/             # Utility functions for general EDA
+│   └── utils/             # Utility functions for the pipeline
 │   └── pipeline.py        # Main executable for the pipeline
 ├── config.yaml            # Configuration file for the ML pipeline
 ├── eda.ipynb              # Exploratory Data Analysis (EDA) notebook

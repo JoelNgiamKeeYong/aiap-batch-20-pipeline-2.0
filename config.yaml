@@ -1,38 +1,47 @@
 # config.yaml
-# This is a configuration file for the machine learning pipeline.
+# - This is a configuration file for the machine learning pipeline.
 
+############################################################################################################################################
 ############################################################################################################################################
 # GENERAL
 LOKY_MAX_CPU_COUNT: "4" # Maximum number of CPU cores to use for parallel processing.
 n_jobs: -1 # Number of parallel jobs to run (-1 means use all available CPU cores).
 random_state: 42 # Random seed for reproducibility (e.g between train-test splits during EDA and pipeline).
+debug: True
+debug_task_type: "regression" # Type of task for debugging. Options: "classification", "regression".
 
 ############################################################################################################################################
-# DATABASE
+############################################################################################################################################
+# DATA
 data_url: "https://techassessment.blob.core.windows.net/aiap20-assessment-data/bmarket.db" # URL to download the SQLite database.
 db_path: "data/bmarket.db" # Path to the SQLite database file.
 db_table_name: "bank_marketing" # Name of the table in the database that contains the data.
 target: "subscription_status" # Name of the target variable in the dataset.
 
 ############################################################################################################################################
+############################################################################################################################################
 # PREPROCESSING
 test_size: 0.2 # Proportion of the dataset to include in the test split (Default: 20%).
 run_on_clean_data: False # Set to True to run the pipeline on clean data (before advanced cleaning and feature engineering).
 
 ############################################################################################################################################
-# EVALUATION
-generate_feature_importance: True # Set to True to generate feature importance plots. Change to False for time efficiency.
-generate_confusion_matrix: True # Set to True to generate confusion matrix plots. Change to False for time efficiency.
-generate_learning_curve: True # Set to True to generate learning curve plots. Change to False for time efficiency.
-generate_calibration_curve: True # Set to True to generate calibration curve plots. Change to False for time efficiency.
-
 ############################################################################################################################################
 # TRAINING & VALIDATION
 use_randomized_cv: False # Set to False to use GridSearchCV instead of RandomizedSearchCV.
 use_smote_enn: True # Set to True to use SMOTE-ENN for handling class imbalance. Uses SMOTE otherwise.
 cv_folds: 5 # Number of cross-validation folds for hyperparameter tuning.
 scoring_metric: "recall" # Metric to optimize during hyperparameter tuning. Options: "recall", "precision", "f1", "roc_auc". (Default: "recall").
-minimum_acceptable_precision: 0.2 # Minimum acceptable precision for the model. 0.2 means 20% precision.
+minimum_acceptable_precision: null # Minimum acceptable precision for the model. 0.2 means 20% precision.
+minimum_acceptable_recall: null # Minimum acceptable recall for the model. 0.2 means 20% recall.
+
+############################################################################################################################################
+############################################################################################################################################
+# EVALUATION
+generate_plots: True # Set to True to generate evaluation plots. Change to False for time efficiency.
+
+############################################################################################################################################
+############################################################################################################################################
+# CANDIDATE MODELS
 model_configuration: # Hyperparameter configurations for different models. Only relevant parameters included - feel free to add more.
   ##########################################################################################################################################
   # LOGISTIC REGRESSION
