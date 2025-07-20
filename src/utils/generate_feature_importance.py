@@ -7,7 +7,7 @@ from sklearn.inspection import permutation_importance
 
 def generate_feature_importance(model_name, best_model, X_train, y_train, feature_names, scoring, output_dir):
     """
-    Compute and save feature importance scores for a given regression model.
+    Compute and save feature importance scores for a given classification / regression model.
 
     The function determines feature importance based on the model type:
     - For linear models, it uses the absolute value of model coefficients.
@@ -17,8 +17,8 @@ def generate_feature_importance(model_name, best_model, X_train, y_train, featur
     The computed feature importances are saved to a text file in the specified output directory.
 
     Args:
-        model_name (str): Name of the regression model (used for labeling the output file).
-        model (object): Trained regression model with a `predict` method.
+        model_name (str): Name of the model (used for labeling the output file).
+        model (object): Trained model with a `predict` method.
         X_train (array-like): Training feature matrix.
         y_train (array-like): Training target values.
         feature_names (list): List of feature names corresponding to the columns in X_train.

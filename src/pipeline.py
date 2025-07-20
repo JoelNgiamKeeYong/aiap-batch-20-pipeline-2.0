@@ -33,6 +33,8 @@ def main():
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Run the ML prediction pipeline")
+    parser.add_argument("--debug", action="store_true", help="Run the pipeline in debug mode for fast iteration.")  
+    parser.add_argument("--task", choices=["classification", "regression"], help="Override task type if known.")
     parser.add_argument("--lite", action="store_true", help="Run the pipeline in lite mode: uses a simpler model.")
     parser.add_argument("--model", nargs="+", choices=["lr", "rf", "xgb", "lgbm"], 
         help="Specify which model(s) to run (lr, rf, xgb, lgbm). If no models are specified, all models will be run.")
@@ -72,8 +74,11 @@ def main():
     #################################################################################################################################
     # ☑️ DEBUG MODE
     # Debug short-circuit pipeline for quick testing
-    if config.get("debug", False):
-        run_debug_pipeline(config)
+    if args.debug:
+        if args.task:
+            run_debug_pipeline(config=config, task_type=args.task)
+        else:
+            run_debug_pipeline(config=config)
         return  # Exit after running debug pipeline
     
     #################################################################################################################################
@@ -140,6 +145,7 @@ def main():
     # - Train the models using the training data.
     if task_type == "regression":
         trained_models = train_regression_models(
+            task_type=task_type,
             models=models, 
             X_train=X_train, y_train=y_train,
             use_randomized_cv=USE_RANDOMIZED_CV,
@@ -148,6 +154,7 @@ def main():
         )
     elif task_type == "classification":
         trained_models = train_classification_models(
+            task_type=task_type,
             models=models, 
             X_train=X_train, y_train=y_train,
             use_randomized_cv=USE_RANDOMIZED_CV,
@@ -162,6 +169,7 @@ def main():
     # - Evaluate the models using the test data.
     if task_type == "regression":
         trained_models = evaluate_regression_models(
+            task_type=task_type,
             trained_models=trained_models,
             X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
             scoring=SCORING_METRIC,
@@ -170,6 +178,7 @@ def main():
         )
     elif task_type == "classification":
         trained_models = evaluate_classification_models(
+            task_type=task_type,
             trained_models=trained_models,
             X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
             scoring=SCORING_METRIC,

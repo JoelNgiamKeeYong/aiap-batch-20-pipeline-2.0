@@ -15,6 +15,7 @@ from utils import generate_feature_importance, generate_learning_curve, save_eva
 
 
 def evaluate_classification_models(
+        task_type,
         trained_models,
         X_train, X_test, y_train, y_test,
         scoring='f1',
@@ -29,6 +30,7 @@ def evaluate_classification_models(
     This function evaluates each trained model by computing various metrics, generating visualizations, and saving the results to the specified output directory. It ensures reproducibility and provides detailed insights into model performance, including general metrics, ROC/PR curves, feature importance, confusion matrices, learning curves, and calibration curves.
 
     Args:
+        task_type (str): Type of task being evaluated (i.e., "classification" or "regression").
         trained_models (list): 
             List of tuples containing trained models to evaluate. Each tuple includes:
             - model_name (str): Name of the model.
@@ -80,9 +82,11 @@ def evaluate_classification_models(
         roc_data.append(roc_data_dict)
         pr_data.append(pr_data_dict)
 
+        # Generate feature importance scores
+        generate_feature_importance(model_name, best_model, X_train, y_train, feature_names, scoring, output_dir) 
+
         # Process feature importance
         if generate_plots:
-            generate_feature_importance(model_name, best_model, X_train, y_train, feature_names, scoring, output_dir) 
             plot_confusion_matrix(
                 model_name=model_name, model=best_model,
                 X_test=X_test, y_test=y_test,
@@ -90,6 +94,7 @@ def evaluate_classification_models(
                 output_dir=output_dir
             )
             generate_learning_curve(
+                task_type=task_type,
                 model_name=model_name, model=best_model,
                 X_train=X_train, y_train=y_train,
                 scoring=scoring,

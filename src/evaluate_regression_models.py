@@ -14,6 +14,7 @@ from utils import generate_feature_importance, generate_learning_curve, save_eva
 
 
 def evaluate_regression_models(
+        task_type,
         trained_models,
         X_train, X_test, y_train, y_test,
         scoring='r2',
@@ -25,6 +26,7 @@ def evaluate_regression_models(
     This function evaluates each trained model by computing regression metrics, generating visualizations, and saving results.
 
     Args:
+        task_type (str): Type of task being evaluated (i.e., "classification" or "regression").
         trained_models (list): 
             List of tuples containing trained models to evaluate. Each tuple includes:
             - model_name (str): Name of the model.
@@ -67,7 +69,7 @@ def evaluate_regression_models(
         # Plotting charts and diagnostics
         if generate_plots:
             plot_error_diagnostics(model_name, best_model, X_test, y_test, output_dir)    
-            generate_learning_curve(model_name, best_model, X_train, y_train, scoring, random_state, n_jobs, output_dir)
+            generate_learning_curve(task_type, model_name, best_model, X_train, y_train, scoring, random_state, n_jobs, output_dir)
 
         # Record evaluation time    
         end_time = time.time()

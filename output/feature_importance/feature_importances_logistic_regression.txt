@@ -1,0 +1,31 @@
+--- 📊 Feature Importance Scores for Logistic Regression:---
+worst texture              1.786545e-02
+mean texture               8.367168e-03
+worst concave points       8.067786e-03
+mean concave points        7.250522e-03
+worst symmetry             6.220167e-03
+worst radius               6.209298e-03
+worst smoothness           6.052777e-03
+worst concavity            6.028911e-03
+worst perimeter            5.182630e-03
+mean concavity             4.681420e-03
+worst area                 4.344886e-03
+mean radius                3.943047e-03
+mean perimeter             3.597026e-03
+mean area                  3.108874e-03
+radius error               1.593546e-03
+area error                 1.064566e-03
+mean fractal dimension     8.282578e-04
+perimeter error            3.580541e-04
+mean smoothness            1.763191e-04
+concavity error            0.000000e+00
+mean compactness           0.000000e+00
+mean symmetry              0.000000e+00
+worst fractal dimension    0.000000e+00
+smoothness error           0.000000e+00
+concave points error       0.000000e+00
+symmetry error             0.000000e+00
+worst compactness         -5.913603e-07
+texture error             -1.769000e-04
+compactness error         -3.579969e-04
+fractal dimension error   -5.342942e-04

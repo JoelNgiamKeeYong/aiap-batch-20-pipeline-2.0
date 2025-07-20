@@ -4,11 +4,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import learning_curve, StratifiedKFold, KFold
-from sklearn.utils.multiclass import type_of_target
-
 
 def generate_learning_curve(
-    model_name, model, X_train, y_train,
+    task_type, model_name, model,
+    X_train, y_train,
     scoring='r2', random_state=42, n_jobs=-1, output_dir='output'
 ):
     """
@@ -21,6 +20,7 @@ def generate_learning_curve(
     - Saves the plot as a PNG in the specified output directory.
 
     Args:
+        task_type (str): Type of task ('classification' or 'regression').
         model_name (str): Name of the model for labeling.
         model (object): Model object that implements fit and predict.
         X_train (array-like): Feature matrix for training.
@@ -34,15 +34,19 @@ def generate_learning_curve(
         None. Saves the learning curve plot as a PNG file.
     """
     try:
-        print(f"      └── Generating and plotting learning curve...")
-
-        # Automatically determine problem type
-        problem_type = type_of_target(y_train)
-        is_classification = problem_type in ('binary', 'multiclass', 'multilabel-indicator')
+        print("      └── Generating and plotting learning curve...")
 
         # Choose appropriate CV strategy
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state) if is_classification \
-             else KFold(n_splits=5, shuffle=True, random_state=random_state)
+        if task_type == "classification":
+            # Check that all classes have enough samples
+            unique, counts = np.unique(y_train, return_counts=True)
+            if np.min(counts) < 2:
+                print("      └── ⚠️  Not enough samples for some classes. Using KFold instead of StratifiedKFold.")
+                cv = KFold(n_splits=5, shuffle=True, random_state=random_state)
+            else:
+                cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state)
+        else:
+            cv = KFold(n_splits=5, shuffle=True, random_state=random_state)
 
         # Define training sizes
         train_sizes = np.linspace(0.1, 1.0, 10)

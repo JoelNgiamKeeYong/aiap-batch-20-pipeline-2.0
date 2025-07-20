@@ -14,11 +14,12 @@ from evaluate_classification_models import evaluate_classification_models
 from evaluate_regression_models import evaluate_regression_models
 
 
-def run_debug_pipeline(config):
+def run_debug_pipeline(config, task_type='classification'):
+
+    # Start timer for the entire debug pipeline
     start_time = time.time()
 
     # Extract configuration parameters
-    DEBUG_TASK_TYPE = config["debug_task_type"]
     TEST_SIZE = config["test_size"]
     RANDOM_STATE = config["random_state"]
     N_JOBS = config["n_jobs"]
@@ -27,12 +28,10 @@ def run_debug_pipeline(config):
     GENERATE_PLOTS = config["generate_plots"]
     CV_FOLDS = config["cv_folds"]
 
-    print("🧪 Debugging ML pipeline...")
-
     #################################################################################################################################
     #################################################################################################################################
     # ✅ CLASSIFICATION TASK
-    if DEBUG_TASK_TYPE == "classification":
+    if task_type == "classification":
         print("   └── Using sklearn's Breast Cancer dataset for classification task...")
 
         # Load the dataset
@@ -68,6 +67,7 @@ def run_debug_pipeline(config):
 
         # Train classification models
         trained_models = train_classification_models(
+            task_type=task_type,
             models=models,
             X_train=X_train, y_train=y_train,
             use_randomized_cv=USE_RANDOMIZED_CV,
@@ -79,6 +79,7 @@ def run_debug_pipeline(config):
 
         # Evaluate the trained models
         trained_models = evaluate_classification_models(
+            task_type=task_type,
             trained_models=trained_models,
             X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
             scoring="f1",
@@ -89,7 +90,7 @@ def run_debug_pipeline(config):
     #################################################################################################################################
     #################################################################################################################################
     # ✅ REGRESSIOn TASK
-    elif DEBUG_TASK_TYPE == "regression":
+    elif task_type == "regression":
         print("   └── Using sklearn's Diabetes dataset for regression task...")
 
         # Load the dataset
@@ -124,6 +125,7 @@ def run_debug_pipeline(config):
 
         # Train regression models
         trained_models = train_regression_models(
+            task_type=task_type,
             models=models,
             X_train=X_train, y_train=y_train,
             use_randomized_cv=USE_RANDOMIZED_CV,
@@ -133,6 +135,7 @@ def run_debug_pipeline(config):
 
         # Evaluate the trained models
         trained_models = evaluate_regression_models(
+            task_type=task_type,
             trained_models=trained_models,
             X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test,
             scoring="neg_root_mean_squared_error",

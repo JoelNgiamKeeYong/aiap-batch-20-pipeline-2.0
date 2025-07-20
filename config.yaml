@@ -7,8 +7,6 @@
 LOKY_MAX_CPU_COUNT: "4" # Maximum number of CPU cores to use for parallel processing.
 n_jobs: -1 # Number of parallel jobs to run (-1 means use all available CPU cores).
 random_state: 42 # Random seed for reproducibility (e.g between train-test splits during EDA and pipeline).
-debug: True
-debug_task_type: "regression" # Type of task for debugging. Options: "classification", "regression".
 
 ############################################################################################################################################
 ############################################################################################################################################

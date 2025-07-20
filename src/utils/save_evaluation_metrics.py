@@ -3,7 +3,6 @@
 import pandas as pd
 from tabulate import tabulate
 
-
 def save_evaluation_metrics(results, output_dir='output'):
     """
     Save consolidated classification / regression evaluation metrics to a text file in a formatted table.

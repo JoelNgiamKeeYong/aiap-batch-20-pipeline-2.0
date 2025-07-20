@@ -40,7 +40,7 @@ def load_data(db_path, db_table_name):
         >>> data = load_data(db_path, db_table_name)
         >>> print(data.head())
     """
-    print("📥 Starting data loading process...")
+    print("\n📥 Starting data loading process...")
     start_time = time.time()
 
     # Validate that the database file exists

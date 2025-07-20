@@ -84,7 +84,7 @@ The pipeline is built to be **reusable, readable, and self-explanatory**, facili
 ├── output/                # Results of model evaluations; contents are auto-generated
 ├── src/                   # Python modules for the ML pipeline
 │   └── utils/             # Utility functions for the pipeline
-│   └── pipeline.py        # Main executable for the pipeline
+│   └── pipeline.py        # Main executable file for the pipeline
 ├── config.yaml            # Configuration file for the ML pipeline
 ├── eda.ipynb              # Exploratory Data Analysis (EDA) notebook
 ├── README.md              # This file
@@ -95,7 +95,7 @@ The pipeline is built to be **reusable, readable, and self-explanatory**, facili
 
 ## 📋 3. Execution Instructions
 
-1. This project requires **Python 3.12.0** for stable execution. Please ensure your environment uses this version. Install dependencies:
+1. This project requires **Python 3.12.0** for stable execution - please ensure your environment uses this version. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
@@ -106,14 +106,16 @@ The pipeline is built to be **reusable, readable, and self-explanatory**, facili
 3. Run the ML pipeline by executing one of the following bash scripts:
 
    ```bash
-   bash run.sh              # Run the full ML pipeline with all models.
-   bash run.sh --lite       # Run the pipeline in lite mode, for quick debugging.
-   bash run.sh --model lr   # Run a single model only (e.g. Logistic Regression). Options: [lr, rf, xgb, lgbm].
+   bash run.sh                                     # Run the full ML pipeline with all models.
+   bash run.sh --lite                              # Run the pipeline in LITE mode, for quick debugging.
+   bash run.sh --model lr                          # Run a single model only (e.g. Logistic Regression). Options: [lr, rf, xgb, lgbm].
+   bash run.sh --debug                             # Run the pipeline in debug mode using a default sample dataset for development.
+   bash run.sh --debug --task classification       # Debug for a specific task type. Options [classification, regression].
    ```
 
 4. Experiment with the ML pipeline by modifying the `config.yaml` and `/src` files, then review the training logs in the `/archives` folder.
 
-5. [Optional] Reset the project:
+5. Reset the project:
 
    ```bash
    bash reset.sh
