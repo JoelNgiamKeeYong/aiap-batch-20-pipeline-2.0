@@ -18,7 +18,7 @@ done
 
 # For the models folder, only delete contents of 'trained_models'
 if [ -d "models" ]; then
-    echo "   └── Deleting contents of 'models'..."
+    echo "   └── Deleting contents of 'models' folder..."
     rm -rf models/*
 else
     echo "   └── 'models' folder does not exist. Skipping deletion."
@@ -28,7 +28,7 @@ fi
 LOG_FILE="archives/training_logs.txt"
 if [ -f "$LOG_FILE" ]; then
     echo
-    read -p "❓  Do you want to delete the '$LOG_FILE' file? (y/n): " CONFIRMATION
+    read -p "❓ Do you want to delete the '$LOG_FILE' file? (y/n): " CONFIRMATION
     if [[ "$CONFIRMATION" == "y" || "$CONFIRMATION" == "Y" ]]; then
         echo "   └── Deleting '$LOG_FILE' file..."
         rm -f "$LOG_FILE"
@@ -39,4 +39,4 @@ fi
 
 # Final confirmation
 echo
-echo "✅ Project reset completed successfully!"
+echo "✅ Project successfully reset!"

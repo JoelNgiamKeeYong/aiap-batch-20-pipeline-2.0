@@ -51,23 +51,46 @@ def log_training_summary(trained_models, start_time):
     log_file_path = os.path.join(archives_dir, "training_logs.txt")
     os.makedirs(archives_dir, exist_ok=True)
 
-    new_content = ""
+    log_entries = []
+
     for model_name, best_model, training_time, model_size_kb, formatted_metrics, evaluation_time in trained_models:
-        new_content += "=" * 135 + "\n"
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        new_content += f"🕛 {current_time} | Model: {model_name}\n"
+
+        header = f"{'='*30} 🧠 {model_name.upper()} | 🕛 {current_time} {'='*30}"
         metrics_table = tabulate(
             pd.DataFrame([formatted_metrics]).to_dict(orient='records'),
             headers="keys",
             tablefmt="grid",
             floatfmt=".2f"
         )
-        new_content += metrics_table + "\n"
-        new_content += f"└──── Model Size: {model_size_kb:.2f} KB\n"
-        new_content += f"└──── Training Time: {training_time:.2f} seconds\n"
-        new_content += f"└──── Evaluation Time: {evaluation_time:.2f} seconds\n"
-        new_content += f"└──── Best Parameters: {best_model.get_params()}\n\n"
 
+        model_info = [
+            f"📦 Model Size     : {model_size_kb:.2f} KB",
+            f"⏱️ Training Time  : {training_time:.2f} seconds",
+            f"🔎 Evaluation Time: {evaluation_time:.2f} seconds"
+        ]
+
+        # Extract and clean parameters
+        best_params = best_model.get_params()
+        relevant_params = {k.replace("model__", ""): v for k, v in best_params.items() if 'model__' in k}
+
+        # Sort alphabetically and format
+        param_lines = ["⚙️ Best Parameters:"]
+        for key in sorted(relevant_params):
+            param_lines.append(f"   └── {key}: {relevant_params[key]}")
+
+        # Combine all sections
+        entry = "\n".join([
+            header,
+            metrics_table,
+            *model_info,
+            *param_lines,
+            "\n"
+        ])
+
+        log_entries.append(entry)
+
+    # Prepend new entries to log history
     if os.path.exists(log_file_path):
         with open(log_file_path, "r", encoding="utf-8") as f:
             existing_content = f.read()
@@ -75,9 +98,7 @@ def log_training_summary(trained_models, start_time):
         existing_content = ""
 
     with open(log_file_path, "w", encoding="utf-8") as f:
-        f.write(new_content + existing_content)
-
-    print("   └── Saved training logs to archives folder\n")
+        f.write("\n".join(log_entries) + existing_content)
 
     # Summary Table
     table_data = [

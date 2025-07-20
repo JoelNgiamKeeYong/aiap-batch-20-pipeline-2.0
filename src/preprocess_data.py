@@ -37,11 +37,6 @@ def preprocess_data(df_cleaned, target, test_size=0.2, run_on_clean_data=False, 
     Raises:
         RuntimeError: 
             If an error occurs during preprocessing, a RuntimeError is raised with details about the failure.
-
-    Example Usage:
-        >>> cleaned_data = pd.read_csv("data/cleaned_data.csv")
-        >>> X_train, X_test, y_train, y_test, df_preprocessed, feature_names = preprocess_data(cleaned_data, target="target_column")
-        >>> print(X_train.head())
     """
     try:
         # Define output paths
@@ -113,7 +108,7 @@ def preprocess_data(df_cleaned, target, test_size=0.2, run_on_clean_data=False, 
         df_preprocessed = pd.concat([X_combined, y_combined], axis=1)
 
         # Save the preprocessed data to CSV files
-        print("\n💾 Saving preprocessed data to /data folder...")
+        print("\n   └── Saving preprocessed data to /data folder...")
 
         # Save consoldiated preprocessed file
         df_preprocessed.to_csv(df_preprocessed_path, index=False)
@@ -121,13 +116,13 @@ def preprocess_data(df_cleaned, target, test_size=0.2, run_on_clean_data=False, 
         # Record time taken
         end_time = time.time() 
         elapsed_time = end_time - start_time
-        print(f"\n✅ Data preprocessing completed in {elapsed_time:.2f} seconds!")
+        print(f"   ✅  Data preprocessing completed in {elapsed_time:.2f} seconds!")
 
         # Return data
         return X_train, X_test, y_train, y_test, df_preprocessed
 
     except Exception as e:
-        print(f"❌ An error occurred during data preprocessing: {e}")
+        print(f"   ❌  An error occurred during data preprocessing: {e}")
         raise RuntimeError("Data preprocessing process failed.") from e
     
 

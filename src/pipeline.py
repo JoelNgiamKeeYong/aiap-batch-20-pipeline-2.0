@@ -33,8 +33,8 @@ def main():
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Run the ML prediction pipeline")
-    parser.add_argument("--debug", action="store_true", help="Run the pipeline in debug mode for fast iteration.")  
-    parser.add_argument("--task", choices=["classification", "regression"], help="Override task type if known.")
+    
+    parser.add_argument("--debug", nargs="+", choices=["classification", "regression"], help="Run the pipeline in debug mode for fast iteration.")  
     parser.add_argument("--lite", action="store_true", help="Run the pipeline in lite mode: uses a simpler model.")
     parser.add_argument("--model", nargs="+", choices=["lr", "rf", "xgb", "lgbm"], 
         help="Specify which model(s) to run (lr, rf, xgb, lgbm). If no models are specified, all models will be run.")
@@ -75,10 +75,7 @@ def main():
     # ☑️ DEBUG MODE
     # Debug short-circuit pipeline for quick testing
     if args.debug:
-        if args.task:
-            run_debug_pipeline(config=config, task_type=args.task)
-        else:
-            run_debug_pipeline(config=config)
+        run_debug_pipeline(config=config, task_type=args.debug[0])
         return  # Exit after running debug pipeline
     
     #################################################################################################################################
@@ -235,7 +232,7 @@ def select_models_to_train(args, all_models):
     # Handle invalid shorthand names
     invalid_models = set(selected_models) - set(model_mapping.keys())
     if invalid_models:
-        print(f"⚠️ Warning: Ignoring invalid model(s): {', '.join(invalid_models)}")
+        print(f"⚠️  Warning: Ignoring invalid model(s): {', '.join(invalid_models)}")
 
     return models
 

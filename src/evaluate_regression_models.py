@@ -74,14 +74,14 @@ def evaluate_regression_models(
         # Record evaluation time    
         end_time = time.time()
         evaluation_time = end_time - start_time
-        print(f"      └── Evaluation completed in {evaluation_time:.2f} seconds")
+        print(f"      └── Evaluation completed in {evaluation_time:.2f} seconds.")
 
         # Update model entry with evaluation results
         trained_models[i] = (model_name, best_model, training_time, model_size_kb, formatted_metrics, evaluation_time)
 
     # Save consolidated results
     save_evaluation_metrics(results, output_dir)
-    print(f"\n💾 Saved evaluation metrics and charts to {output_dir} folder")
+    print(f"\n   └── Saved evaluation metrics and charts to {output_dir} folder.")
 
     return trained_models
 

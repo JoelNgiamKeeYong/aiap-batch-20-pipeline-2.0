@@ -21,11 +21,6 @@ def clean_data(df):
     Raises:
         RuntimeError: 
             If an error occurs during the cleaning process, a RuntimeError is raised with details about the failure.
-
-    Example Usage:
-        >>> raw_data = pd.read_csv("data/raw_data.csv")
-        >>> cleaned_data = clean_data(raw_data)
-        >>> print(cleaned_data.head())
     """
     try:
         # Define output path
@@ -64,13 +59,13 @@ def clean_data(df):
         df_cleaned = clean_previous_contact_days(df_cleaned)
         
         # Save the cleaned data to a CSV file
-        print(f"\n💾 Saving cleaned data to {output_path}...")
+        print(f"\n   └── Saving cleaned data to {output_path}...")
         df_cleaned.to_csv(output_path, index=False)
 
         # Record time
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(f"\n✅ Data cleaning completed in {elapsed_time:.2f} seconds!")
+        print(f"   ✅  Data cleaning completed in {elapsed_time:.2f} seconds!")
 
         # Return cleaned dataset
         return df_cleaned

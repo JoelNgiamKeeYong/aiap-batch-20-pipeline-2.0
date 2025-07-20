@@ -109,7 +109,7 @@ def evaluate_classification_models(
 
         end_time = time.time()
         evaluation_time = end_time - start_time
-        print(f"      └── Evaluation completed in {evaluation_time:.2f} seconds!")
+        print(f"      └── Evaluation completed in {evaluation_time:.2f} seconds.")
 
         # Add evaluation_time to the trained_models list
         trained_models[i] = (model_name, best_model, training_time, model_size_kb, formatted_metrics, evaluation_time)
@@ -119,7 +119,7 @@ def evaluate_classification_models(
     if generate_plots:
         plot_combined_roc_curves(roc_data, output_dir)
         plot_combined_pr_curves(pr_data, output_dir)
-    print(f"\n💾 Saved evaluation metrics and charts to {output_dir} folder!")
+    print(f"\n   └── Saved evaluation metrics and charts to {output_dir} folder.")
 
     return trained_models
 

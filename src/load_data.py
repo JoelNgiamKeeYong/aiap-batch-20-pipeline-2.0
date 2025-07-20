@@ -33,12 +33,6 @@ def load_data(db_path, db_table_name):
             If the specified table does not exist in the database.
         sqlite3.Error: 
             If there is an error connecting to or querying the database.
-
-    Example Usage:
-        >>> db_path = "data/noshow.db"
-        >>> db_table_name = "noshow"
-        >>> data = load_data(db_path, db_table_name)
-        >>> print(data.head())
     """
     print("\n📥 Starting data loading process...")
     start_time = time.time()
@@ -80,7 +74,7 @@ def load_data(db_path, db_table_name):
     # Print summary and return the data
     end_time = time.time() 
     elapsed_time = end_time - start_time
-    print(f"   └── {len(df):,} records successfully loaded in {elapsed_time:.2f} seconds!")
+    print(f"   ✅  {len(df):,} records successfully loaded in {elapsed_time:.2f} seconds!")
 
     # Return the data
     return df
