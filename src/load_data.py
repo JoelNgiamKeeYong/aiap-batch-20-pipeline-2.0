@@ -17,22 +17,16 @@ def load_data(db_path, db_table_name):
     - Closes the database connection after loading the data.
 
     Parameters:
-        db_path (str): 
-            Path to the SQLite database file.
-        db_table_name (str): 
-            Name of the table to load data from.
+        db_path (str): Path to the SQLite database file.
+        db_table_name (str): Name of the table to load data from.
 
     Returns:
-        pandas.DataFrame: 
-            The dataset loaded into a DataFrame.
+        pandas.DataFrame: The dataset loaded into a DataFrame.
 
     Raises:
-        FileNotFoundError: 
-            If the database file is not found at the specified path.
-        ValueError: 
-            If the specified table does not exist in the database.
-        sqlite3.Error: 
-            If there is an error connecting to or querying the database.
+        FileNotFoundError: If the database file is not found at the specified path.
+        ValueError: If the specified table does not exist in the database.
+        sqlite3.Error: If there is an error connecting to or querying the database.
     """
     print("\n📥 Starting data loading process...")
     start_time = time.time()

@@ -109,8 +109,7 @@ The pipeline is built to be **reusable, readable, and self-explanatory**, facili
    bash run.sh                                     # Run the full ML pipeline with all models.
    bash run.sh --lite                              # Run the pipeline in LITE mode, for quick debugging.
    bash run.sh --model lr                          # Run a single model only (e.g. Logistic Regression). Options: [lr, rf, xgb, lgbm].
-   bash run.sh --debug                             # Run the pipeline in debug mode using a default sample dataset for development.
-   bash run.sh --debug --task classification       # Debug for a specific task type. Options [classification, regression].
+   bash run.sh --debug classification              # Run the pipeline in debug mode using a default sample dataset. Options [classification, regression].
    ```
 
 4. Experiment with the ML pipeline by modifying the `config.yaml` and `/src` files, then review the training logs in the `/archives` folder.

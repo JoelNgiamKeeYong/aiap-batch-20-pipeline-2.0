@@ -26,7 +26,6 @@ from train_regression_models import train_regression_models
 from evaluate_classification_models import evaluate_classification_models
 from evaluate_regression_models import evaluate_regression_models
 
-
 def main():
     # Start timer
     start_time = time.time()

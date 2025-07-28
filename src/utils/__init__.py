@@ -1,5 +1,6 @@
 # src/utils/__init__.py
 
+from .apply_numerical_scaling import apply_numerical_scaling
 from .compare_dataframes import compare_dataframes
 from .create_search_cv import create_search_cv
 from .generate_feature_importance import generate_feature_importance
@@ -8,6 +9,7 @@ from .log_training_summary import log_training_summary
 from .save_evaluation_metrics import save_evaluation_metrics
 
 __all__ = [
+    "apply_numerical_scaling",
     "compare_dataframes", "create_search_cv",
     "generate_feature_importance", "generate_learning_curve",
     "log_training_summary",

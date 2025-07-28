@@ -13,7 +13,6 @@ from train_regression_models import train_regression_models
 from evaluate_classification_models import evaluate_classification_models
 from evaluate_regression_models import evaluate_regression_models
 
-
 def run_debug_pipeline(config, task_type='classification'):
 
     # Start timer for the entire debug pipeline
